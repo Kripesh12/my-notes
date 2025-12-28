@@ -10,7 +10,7 @@
 /build/
 /dist/
 
-.air/
+
 tmp/
 
 go.work
