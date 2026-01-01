@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -22,13 +21,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := requestBody.Validate(); err != nil {
-		response.WriteError(w, http.StatusCreated, err.Error())
+		response.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	hashedPassword, err := auth.HashPassword(requestBody.Password)
 	if err != nil {
-		fmt.Println()
+		if db.IsDuplicateError(err) {
+			response.WriteError(w, http.StatusBadRequest, "user with this email already exists")
+		}
+
 		response.WriteError(w, http.StatusInternalServerError, "failed to create a user")
 		http.Error(w, "server error", 500)
 		return
@@ -44,12 +46,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("database error during registration: %v", err)
-		response.WriteJson(w, http.StatusInternalServerError, "failed to create user")
+		response.WriteError(w, http.StatusInternalServerError, "failed to create user")
+		return
 	}
 
 	response.WriteJson(w, http.StatusCreated, dto.RegisterResponse{
 		ID:    userId,
 		Email: requestBody.Email,
 	})
-
 }
