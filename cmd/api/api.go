@@ -28,6 +28,7 @@ func (app *application) mount() http.Handler {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/", app.greetHandler)
 		r.Get("/health", app.healthCheckHandler)
+		r.Mount("/auth", routes.AuthRoutes())
 		r.Mount("/todos", routes.TodoRoutes())
 	})
 

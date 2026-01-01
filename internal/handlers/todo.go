@@ -30,7 +30,10 @@ func GetTodos(w http.ResponseWriter, r *http.Request) {
 		todos = append(todos, t)
 	}
 
-	json.NewEncoder(w).Encode(todos)
+	if err = json.NewEncoder(w).Encode(todos); err != nil {
+		http.Error(w, "cannot encode todos", http.StatusInternalServerError)
+		return
+	}
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
